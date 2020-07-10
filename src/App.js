@@ -7,6 +7,9 @@ import {CssReset, CircularLoader, ScreenCover} from '@dhis2/ui-core'
 import {useMetadata} from './hooks/useMetadata'
 import { Select } from './components/Select/SelectField'
 import Testing from './components/page/page.component'
+import { Sidebar } from './components/Sidebar/Sidebar.component'
+
+import styles from './App.module.css'
 
 const query = {
     me: {
@@ -34,7 +37,14 @@ const MyApp = () => {
         }
         {showApp && (
             <div>
-                <Testing programs={programs}></Testing>
+                <div className = {styles.container}>
+                    <div className={styles.sidebar}>
+                        <Sidebar/>
+                    </div>
+                    <div className={styles.content}>
+                        <Testing programs={programs}></Testing>
+                    </div>
+                </div>
             </div>       
         )}
         </>

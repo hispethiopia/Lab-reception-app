@@ -33,7 +33,7 @@ class Testing extends React.Component {
                             options={this.programOptions}
                             change={this.handleChange}
                             selected={this.state.selectedProgram ? this.state.selectedProgramOption : this.programOptions[0]} 
-                            label="Please select a program"
+                            label="Program"
                             required={true}/>
                     </div>
                 </Card>
