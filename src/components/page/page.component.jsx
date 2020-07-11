@@ -7,23 +7,33 @@ import styles from './page.module.css'
 //import { SingleSelectField } from '../Select/SelectField'
 
 class Page extends React.Component {
-
-    programOptions = this.props.programs.map(prog => ({ label: prog.name, name: prog.name, value: prog.id }))
-
     constructor(props) {
         super(props)
+        console.log("props is ", props)
         this.state = {
             selectedProgram: '',
             selectedStage: '',
+            selectedLab: ''
         }
     }
 
     handleProgramChange = ({ selected }) => {
-        this.setState({ selectedProgram: this.props.programs[selected.value] })
+        this.setState({
+            selectedProgram: this.props.programs[selected.value],
+            selectedStage: '',
+            selectedLab: ''
+        })
     }
 
     handleStageChange = ({ selected }) => {
-        this.setState({ selectedStage: this.props.stages[selected.value]})
+        this.setState({
+            selectedStage: this.props.stages[selected.value],
+            selectedLab: ''
+        })
+    }
+
+    handleLabChange = ({ selected }) => {
+        this.setState({ selectedLab: this.props.labSites.options[selected.value] })
     }
 
     render() {
@@ -70,13 +80,38 @@ class Page extends React.Component {
                                         this.props.stages.map(stage => {
                                             return (
                                                 stage.program.id === this.state.selectedProgram.id ?
-                                                <SingleSelectOption
-                                                    label={stage.displayName}
-                                                    value={stage.id}
-                                                    key={stage.id}
-                                                />:""
+                                                    <SingleSelectOption
+                                                        label={stage.displayName}
+                                                        value={stage.id}
+                                                        key={stage.id}
+                                                    /> : ""
                                             )
-                                }) : <div></div>
+                                        }) : <div></div>
+                                }
+                            </SingleSelectField>
+                        }
+                        {this.state.selectedStage &&
+                            <SingleSelectField
+                                className="content"
+                                onChange={this.handleLabChange}
+                                selected={
+                                    this.state.selectedLab ?
+                                        (
+                                            { label: this.state.selectedLab.displayName, value: this.state.selectedLab.id, key: this.state.selectedLab.id }
+                                        ) : {}}
+                                label="Laboratory"
+                                required={true}>
+                                {
+                                    Array.isArray(this.props.labSites.options) && this.props.labSites.options.length > 0 ?
+                                        this.props.labSites.options.map(site => {
+                                            return (
+                                                <SingleSelectOption
+                                                    label={site.displayName}
+                                                    value={site.id}
+                                                    key={site.id}
+                                                />
+                                            )
+                                        }) : <div></div>
                                 }
                             </SingleSelectField>
                         }

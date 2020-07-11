@@ -2,6 +2,10 @@ import {
     useDataQuery
 } from '@dhis2/app-runtime'
 
+const PROGRAMS= "programs"
+const PROGRAM_STAGES = "programStages"
+const OPTION_SETS = "optionSets"
+
 const trackedAttributeQuery = {
     trackedEntityAttributes: {
         resource: 'trackedEntityAttributes',
@@ -14,8 +18,17 @@ const stagesQuery={
         params:{
             fields:'id,displayName,program[id]',
             paging:'false'
-        },
-        paging:"false"
+        }
+    }
+}
+
+const optionsQuery ={
+    optionSets:{
+        resource: 'optionSets',
+        params:{
+            fields: 'id,displayName,code,options[id,displayName]',
+            paging: 'false',
+        }
     }
 }
 
@@ -25,21 +38,25 @@ const programQuery = {
         params: {
             fields: 'id,name,programStages[id,displayName],programTrackedEntityAttributes[id,searchable,displayName]',
             paging: 'false'
-        },
-        paging: "false"
+        }
     }
 }
 
 const useMetadata = (dataToFetch) => {
     let query = {};
+    console.log(dataToFetch)
     const engine = useDataQuery;
     switch (dataToFetch){
-        case "programs":{
+        case PROGRAMS:{
             query = programQuery
             break;
         }
-        case "programStages":{
+        case PROGRAM_STAGES:{
             query = stagesQuery
+            break;
+        }
+        case OPTION_SETS:{
+            query = optionsQuery
             break;
         }
     }
@@ -50,6 +67,9 @@ const useMetadata = (dataToFetch) => {
     if(data){
         console.log("data is ",data,"dataToFetch is ",dataToFetch,"query is ",query)
         makeIdIndexed(data[dataToFetch][dataToFetch])
+        if(dataToFetch===OPTION_SETS){
+            data[dataToFetch][dataToFetch].map(optionSet=>{makeIdIndexed(optionSet.options)})
+        }
     }
     return {
         loading,
@@ -67,5 +87,8 @@ const makeIdIndexed = objs => {
 
 
 export {
-    useMetadata
+    useMetadata,
+    PROGRAMS,
+    PROGRAM_STAGES,
+    OPTION_SETS
 }
