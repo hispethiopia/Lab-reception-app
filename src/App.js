@@ -1,12 +1,8 @@
 import React from 'react'
-import { DataQuery } from '@dhis2/app-runtime'
-import i18n from '@dhis2/d2-i18n'
-import classes from './App.module.css'
 import {CssReset, CircularLoader, ScreenCover} from '@dhis2/ui-core'
 
 import {useMetadata} from './hooks/useMetadata'
-import { Select } from './components/Select/SelectField'
-import Testing from './components/page/page.component'
+import Page from './components/page/page.component'
 import { Sidebar } from './components/Sidebar/Sidebar.component'
 
 import styles from './App.module.css'
@@ -17,19 +13,18 @@ const query = {
     },
 }
 
-
-
 const MyApp = () => {
 
-    const {loading, error, programs} = useMetadata();
+    const {loading:loadingPrograms, error:programsError, data:programs} = useMetadata("programs");
+    const {loading:loadingStages, error:stagesError, data: stages} = useMetadata("programStages")
     
 
-    const showApp = !loading && !error
+    const showApp = !loadingPrograms && !programsError && !loadingStages && !stagesError
     return (
         <>
         <CssReset />
         {
-            loading && (
+            (loadingPrograms || loadingStages) && (
                 <ScreenCover dataTest="app-screen-cover">
                     <CircularLoader dataTest="app-loader"/>
                 </ScreenCover>
@@ -42,7 +37,7 @@ const MyApp = () => {
                         <Sidebar/>
                     </div>
                     <div className={styles.content}>
-                        <Testing programs={programs}></Testing>
+                        <Page programs={programs} stages={stages} />
                     </div>
                 </div>
             </div>       

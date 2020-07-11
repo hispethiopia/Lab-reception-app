@@ -1,11 +1,21 @@
 import {
-    useDataEngine,
     useDataQuery
 } from '@dhis2/app-runtime'
 
 const trackedAttributeQuery = {
     trackedEntityAttributes: {
         resource: 'trackedEntityAttributes',
+    }
+}
+
+const stagesQuery={
+    programStages:{
+        resource: 'programStages',
+        params:{
+            fields:'id,displayName,program[id]',
+            paging:'false'
+        },
+        paging:"false"
     }
 }
 
@@ -20,25 +30,31 @@ const programQuery = {
     }
 }
 
-const useMetadata = () => {
+const useMetadata = (dataToFetch) => {
+    let query = {};
     const engine = useDataQuery;
-    const {
-        loading,
-        error,
-        data
-    } = engine(programQuery)
-
-    if (error) {
-        console.log("useMetadata error: ", error)
+    switch (dataToFetch){
+        case "programs":{
+            query = programQuery
+            break;
+        }
+        case "programStages":{
+            query = stagesQuery
+            break;
+        }
     }
-    data ? makeIdIndexed(data.programs.programs) : null
-
-    console.log("data ", data && data.programs)
-
+    const {loading,  error, data } = engine(query)
+    if (error) {
+        console.log(`Fetching ${dataToFetch} error: `, error)
+    }
+    if(data){
+        console.log("data is ",data,"dataToFetch is ",dataToFetch,"query is ",query)
+        makeIdIndexed(data[dataToFetch][dataToFetch])
+    }
     return {
         loading,
         error,
-        programs: data && data.programs.programs
+        data: data && data[dataToFetch][dataToFetch]
     }
 }
 

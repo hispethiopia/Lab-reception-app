@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { OrganisationUnitTree } from '@dhis2/ui-widgets'
 
