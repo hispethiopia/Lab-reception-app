@@ -1,39 +1,44 @@
-import React from 'react'
+import React, { useCallback } from 'react'
+import {connect} from 'react-redux'
 
-import { Card, SingleSelectField, SingleSelectOption } from "@dhis2/ui-core"
+import { Card, SingleSelectField, SingleSelectOption, InputField, Button } from "@dhis2/ui-core"
 
 import styles from './page.module.css'
 
-//import { SingleSelectField } from '../Select/SelectField'
+import NewForm from '../page/CustomForm/newForm.component'
+import { onSelectProgram, onSelectStage, onSelectLabSite, onSelectDuration, onSelectViewData } from '../../store/actions'
 
 class Page extends React.Component {
-    constructor(props) {
-        super(props)
-        console.log("props is ", props)
-        this.state = {
-            selectedProgram: '',
-            selectedStage: '',
-            selectedLab: ''
-        }
+
+    handleDayChange = (ref) => {
+        this.props.onViewData(false)
+        this.props.onDurationSelected(ref.value)
     }
 
     handleProgramChange = ({ selected }) => {
-        this.setState({
-            selectedProgram: this.props.programs[selected.value],
-            selectedStage: '',
-            selectedLab: ''
-        })
+        this.props.onProgramSelected(this.props.programs[selected.value])
+        //this.props.onDurationSelected('')
+        this.props.onLabSiteSelected('')
+        this.props.onViewData(false)
     }
 
     handleStageChange = ({ selected }) => {
-        this.setState({
-            selectedStage: this.props.stages[selected.value],
-            selectedLab: ''
-        })
+        this.props.onStageSelected(this.props.stages[selected.value])
+        this.props.onLabSiteSelected('')
+        this.props.onViewData(false)
     }
 
     handleLabChange = ({ selected }) => {
-        this.setState({ selectedLab: this.props.labSites.options[selected.value] })
+        this.props.onLabSiteSelected(this.props.labSites.options[selected.value])
+        this.props.onViewData(false)
+        //this.setState({ selectedLab: this.props.labSites.options[selected.value], displayData: false })
+    }
+
+    handleLoadButton = () => {
+        this.props.onViewData(true)
+        //this.setState({ displayData: true })
+        console.log("Buton clicked")
+
     }
 
     render() {
@@ -45,9 +50,9 @@ class Page extends React.Component {
                             className="content"
                             onChange={this.handleProgramChange}
                             selected={
-                                this.state.selectedProgram ?
+                                this.props.selectedProgram ?
                                     (
-                                        { label: this.state.selectedProgram.name, value: this.state.selectedProgram.id, key: this.state.selectedProgram.id }
+                                        { label: this.props.selectedProgram.name, value: this.props.selectedProgram.id, key: this.props.selectedProgram.id }
                                     ) : {}}
                             label="Program"
                             required={true}>
@@ -64,14 +69,14 @@ class Page extends React.Component {
                                     }) : <div></div>
                             }
                         </SingleSelectField>
-                        {this.state.selectedProgram &&
+                        {this.props.selectedProgram &&
                             <SingleSelectField
                                 className="content"
                                 onChange={this.handleStageChange}
                                 selected={
-                                    this.state.selectedStage ?
+                                    this.props.selectedStage ?
                                         (
-                                            { label: this.state.selectedStage.displayName, value: this.state.selectedStage.id, key: this.state.selectedStage.id }
+                                            { label: this.props.selectedStage.displayName, value: this.props.selectedStage.id, key: this.props.selectedStage.id }
                                         ) : {}}
                                 label="Stage"
                                 required={true}>
@@ -79,7 +84,7 @@ class Page extends React.Component {
                                     Array.isArray(this.props.stages) && this.props.stages.length > 0 ?
                                         this.props.stages.map(stage => {
                                             return (
-                                                stage.program.id === this.state.selectedProgram.id ?
+                                                stage.program.id === this.props.selectedProgram.id ?
                                                     <SingleSelectOption
                                                         label={stage.displayName}
                                                         value={stage.id}
@@ -90,14 +95,14 @@ class Page extends React.Component {
                                 }
                             </SingleSelectField>
                         }
-                        {this.state.selectedStage &&
+                        {this.props.selectedStage &&
                             <SingleSelectField
                                 className="content"
                                 onChange={this.handleLabChange}
                                 selected={
-                                    this.state.selectedLab ?
+                                    this.props.selectedLaboratory ?
                                         (
-                                            { label: this.state.selectedLab.displayName, value: this.state.selectedLab.id, key: this.state.selectedLab.id }
+                                            { label: this.props.selectedLaboratory.displayName, value: this.props.selectedLaboratory.id, key: this.props.selectedLaboratory.id }
                                         ) : {}}
                                 label="Laboratory"
                                 required={true}>
@@ -115,11 +120,74 @@ class Page extends React.Component {
                                 }
                             </SingleSelectField>
                         }
+                        {
+                            this.props.selectedLaboratory &&
+                            <>
+                                <InputField
+                                    label="Days"
+                                    name="days"
+                                    type="number"
+                                    value={this.props.selectedDuration}
+                                    onChange={this.handleDayChange}
+                                />
+                                <Button
+                                    style={{ alignment: 'right' }}
+                                    name="Start"
+                                    small
+                                    type="button"
+                                    value="default"
+                                    position="right"
+                                    onClick={this.handleLoadButton}
+                                >
+                                    Load
+                            </Button>
+                            </>
+                        }
                     </div>
                 </Card>
-            </div >
+                <Card>
+                    <div className={styles.content}>
+                        {
+                            this.props.viewData &&
+                            <NewForm></NewForm>
+                            /*
+                                <CustomForm
+                                    selectedProgram={this.state.selectedProgram}
+                                    selectedStage={this.state.selectedStage}
+                                    selectedLab={this.state.selectedLab}
+                                    dateDuration={this.dateDuration}
+                                />*/
+                        }
+                    </div>
+                </Card>
+            </div>
         )
     }
 }
 
-export default Page
+const mapStateToProps = state => {
+    return {
+        selectedProgram: state.selectedDataReducer.selectedProgram,
+        selectedStage: state.selectedDataReducer.selectedStage,
+        selectedLaboratory: state.selectedDataReducer.selectedLaboratory,
+        selectedDuration: state.selectedDataReducer.selectedDuration,
+        viewData: state.selectedDataReducer.viewData,
+
+        programs: state.staticDataReducer.programs,
+        stages: state.staticDataReducer.stages,
+        optionSets: state.staticDataReducer.optionSets
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onProgramSelected: (prg) => dispatch(onSelectProgram(prg)),
+        onStageSelected: (stg) => dispatch(onSelectStage(stg)),
+        onLabSiteSelected: (lab) => dispatch(onSelectLabSite(lab)),
+        onDurationSelected : (duration) => dispatch(onSelectDuration(duration)),
+        onViewData: (value) => dispatch(onSelectViewData(value))
+    }
+}
+
+
+export default connect(mapStateToProps,mapDispatchToProps)(Page)

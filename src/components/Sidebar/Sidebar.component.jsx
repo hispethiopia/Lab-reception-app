@@ -1,25 +1,12 @@
 import React from 'react'
+import { connect } from 'react-redux'
 
 import { OrganisationUnitTree } from '@dhis2/ui-widgets'
 
+import {onSelectOrgUnit} from '../../store/actions'
+
 
 class Sidebar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            selectedOrgUnit: [],
-            selectedOrgUnitId: {}
-        }
-    }
-
-    onOrgUnitSelect = (orgUnitSelected) => {
-        console.log(orgUnitSelected);
-        let test = [orgUnitSelected.path]
-        console.log("new State ", test)
-        this.setState({ selectedOrgUnit: [orgUnitSelected.path] })
-        this.setState({ selectedOrgUnitId: orgUnitSelected })
-    }
-
     render() {
         return (
 
@@ -27,12 +14,12 @@ class Sidebar extends React.Component {
 
                 <OrganisationUnitTree
                     name="Root org unit"
-                    onChange={this.onOrgUnitSelect}
-                    onSelectClick={this.onOrgUnitSelect}
+                    onChange={this.props.onOrgUnitSelected}
+                    onSelectClick={this.props.onOrgUnitSelected}
                     roots={[
                         'b3aCK1PTn5S'
                     ]}
-                    selected={this.state.selectedOrgUnit}
+                    selected={this.props.selectedOrg? [this.props.selectedOrg.path]:[]}
                     singleSelection
                 />
             </div>
@@ -40,4 +27,17 @@ class Sidebar extends React.Component {
     }
 }
 
-export { Sidebar }
+const mapStateToProps = state => {
+    return {
+        selectedOrg: state.selectedDataReducer.selectedOrgUnit
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onOrgUnitSelected: (orgUnit) => dispatch(onSelectOrgUnit(orgUnit))
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Sidebar)
