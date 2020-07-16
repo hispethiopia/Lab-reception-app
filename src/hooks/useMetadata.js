@@ -17,7 +17,7 @@ const stagesQuery = {
     programStages: {
         resource: 'programStages',
         params: {
-            fields: 'id,displayName,program[id]',
+            fields: 'id,displayName,program[id],programStageDataElements[dataElement[id,code,displayName,valueType]]',
             paging: 'false'
         }
     }
@@ -37,7 +37,7 @@ const programQuery = {
     programs: {
         resource: 'programs',
         params: {
-            fields: 'id,name,programStages[id,displayName],programTrackedEntityAttributes[id,searchable,displayName]',
+            fields: 'id,name,programStages[id,displayName,programStageDataElements[compulsory,dataElement[id,code,displayName,valueType]]],programTrackedEntityAttributes[mandatory,id,searchable,displayName,*,trackedEntityAttribute[id,code,displayName]]',
             paging: 'false'
         }
     }
@@ -87,6 +87,17 @@ const useMetadata = (dataToFetch) => {
         if (dataToFetch === OPTION_SETS) {
             data[dataToFetch][dataToFetch].map(optionSet => {
                 makeIdIndexed(optionSet.options)
+            })
+        }
+        if (dataToFetch === PROGRAMS) {
+            data[dataToFetch][dataToFetch].map(program => {
+                makeIdIndexed(program.programStages)
+                program.programStages.map(stage=>{
+                    stage.programStageDataElements.forEach(dataStageElement=>{
+                        stage.programStageDataElements[dataStageElement.dataElement.id]=dataStageElement.dataElement
+                    })
+                })
+
             })
         }
     }

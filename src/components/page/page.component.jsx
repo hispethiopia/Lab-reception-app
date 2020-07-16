@@ -23,7 +23,7 @@ class Page extends React.Component {
     }
 
     handleStageChange = ({ selected }) => {
-        this.props.onStageSelected(this.props.stages[selected.value])
+        this.props.onStageSelected(this.props.selectedProgram.programStages[selected.value])
         this.props.onLabSiteSelected('')
         this.props.onViewData(false)
     }

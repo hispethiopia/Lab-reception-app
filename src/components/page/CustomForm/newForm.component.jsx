@@ -3,7 +3,7 @@ import { useDataQuery } from '@dhis2/app-runtime'
 import {connect} from 'react-redux'
 
 import CustomForm from './CustomForm.component'
-import { getAllEvents } from '../../../hooks/useData'
+import { getEvents, getTeis, mapTeiWithEvents } from '../../../hooks/useData'
 
 const teiQuery = {
     trackedEntityInstances: {
@@ -16,17 +16,22 @@ const NewForm = (props) => {
     const vars = {
         selectedOrgUnit: props.selectedOrgUnit.id,
         selectedDuration: props.selectedDuration,
-        selectedProgram: props.selectedProgram,
-        selectedStage: props.selectedStage,
+        selectedProgram: props.selectedProgram.id,
+        selectedStage: props.selectedStage.id,
         ouMode: "SELECTED"
+    } 
+    var remappedTeis =null;
+    const { loading, error, data } = getTeis(vars,props.dataElements)
+    const { loading:eventLoading, error:eventError, data:events } = getEvents(vars,props.dataElements)
+    
+    if(events && data){
+        remappedTeis=mapTeiWithEvents(data,events)
     }
-    const { loading, error, data } = getAllEvents(vars,props.dataElements)
-    console.log(loading, error, data)
 
     return (
         <>
             {
-                loading &&
+                (loading || eventLoading) &&
                 <span>Loading</span>
             }
             {
@@ -34,8 +39,8 @@ const NewForm = (props) => {
                 <span>Error</span>
             }
             {
-                data &&
-                <CustomForm allEvents={data}></CustomForm>
+                remappedTeis &&
+                <CustomForm allEvents={remappedTeis}></CustomForm>
             }
         </>
     )

@@ -22,7 +22,7 @@ const EntryPoint = (props) => {
     const { loading: loadingPrograms, error: programsError, data: programs } = useMetadata(PROGRAMS);
     const { loading: loadingStages, error: stagesError, data: stages } = useMetadata(PROGRAM_STAGES)
     const { loading: loadingOptionSets, error: optionSetError, data: optionSets } = useMetadata(OPTION_SETS)
-    const { loading: loadingDataElements, error: dataElementError, data: dataElements} = useMetadata(DATA_ELEMENTS)
+    const { loading: loadingDataElements, error: dataElementError, data: dataElements } = useMetadata(DATA_ELEMENTS)
 
     useEffect(() => {
         if (!loadingPrograms && programs && programs !== props.programs) {
@@ -34,13 +34,19 @@ const EntryPoint = (props) => {
         if (!loadingOptionSets && optionSets && optionSets !== props.optionSets) {
             props.setAllOptionSets(optionSets)
         }
-        if(!loadingDataElements && dataElements && dataElements!== props.dataElements){
-            console.log("data elements is ",dataElements)
+        if (!loadingDataElements && dataElements && dataElements !== props.dataElements) {
             props.setAllDataElements(dataElements)
         }
     })
 
-    const showApp = props.optionSets && props.optionSets.length > 0 && !loadingPrograms && !programsError && !loadingStages && !stagesError && !loadingOptionSets && !optionSetError
+    const showApp = props.optionSets &&
+        props.optionSets.length > 0 &&
+        !loadingPrograms &&
+        !programsError &&
+        !loadingStages &&
+        !stagesError &&
+        !loadingOptionSets &&
+        !optionSetError
     return (
         <>
             <CssReset />

@@ -30,7 +30,6 @@ const staticDataReducer = (state = initialState, action) => {
                 ...state,
                 dataElements: action.dataElements
             };
-
         default:
             return state
     }
