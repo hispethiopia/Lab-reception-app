@@ -67,7 +67,7 @@ const extractTeiParams = ({
 const getEvents = (params, allDataElements) => {
     var engine = useDataQuery;
     var eventParams = extractEventParams(params)
-    eventParams.fields = "trackedEntityInstance,event,dataValues[dataElement,value]"
+    eventParams.fields = "trackedEntityInstance,event,orgUnit,completedDate,status,dataValues[dataElement,value]"
 
     const {
         loading,

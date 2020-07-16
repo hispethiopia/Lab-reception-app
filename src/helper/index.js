@@ -16,26 +16,26 @@ const validate = (instance, program, stage) => {
     if (!instance.event) {
         errors.push(`No event created with in the provided selection.`)
     }
-
     /**
      * Check compulsory data elements in stage.
      */
     else {
+        if (instance.event && instance.event.status!== "COMPLETED") {
+            errors.push("Event not completed")
+        }
         stage.programStageDataElements.forEach(dataElement => {
             if (dataElement.compulsory && !instance.event.dataValues[dataElement.dataElement.id]) {
                 errors.push(`Mandatory value ${dataElement.dataElement.displayName} missing`)
             }
         });
     }
-    if (errors.length > 0) {
-        console.log("EROR is ", errors)
-    }
+
     return errors
 
 }
 
-const checkSpecimenId =(specimenIdToCheck)=>{
-    
+const checkSpecimenId = (specimenIdToCheck) => {
+
 }
 
 

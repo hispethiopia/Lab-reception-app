@@ -1,30 +1,28 @@
 import React, { useEffect } from 'react'
-import { CssReset, CircularLoader, ScreenCover } from '@dhis2/ui-core'
+import { CssReset, CircularLoader, ScreenCover, Button } from '@dhis2/ui-core'
 
 import { useMetadata, PROGRAMS, PROGRAM_STAGES, OPTION_SETS, DATA_ELEMENTS } from './hooks/useMetadata'
 import reducer from './store/reducers'
 
 import Page from './components/page/page.component'
 import Sidebar from './components/Sidebar/Sidebar.component'
-
-import { createStore, applyMiddleware, compose } from 'redux'
-
-import { useSelector, useDispatch, connect } from 'react-redux'
+import { connect } from 'react-redux'
 
 import styles from './App.module.css'
 import { setPrograms, setStages, setOptionSets, setDataElements } from './store/actions'
 
-const LAB_SITES_OPTION_SET_CODE = "Testing_sites"
+import {LAB_SITES_OPTION_SET_CODE} from './helper/constants'
 
 const EntryPoint = (props) => {
-    /*const staticDataReducer = useSelector(state=> state.staticDataReducer)
-    const dispatch = useDispatch()*/
     const { loading: loadingPrograms, error: programsError, data: programs } = useMetadata(PROGRAMS);
     const { loading: loadingStages, error: stagesError, data: stages } = useMetadata(PROGRAM_STAGES)
     const { loading: loadingOptionSets, error: optionSetError, data: optionSets } = useMetadata(OPTION_SETS)
     const { loading: loadingDataElements, error: dataElementError, data: dataElements } = useMetadata(DATA_ELEMENTS)
 
     useEffect(() => {
+
+        //var x = temp.mutate();
+
         if (!loadingPrograms && programs && programs !== props.programs) {
             props.setAllPrograms(programs)
         }

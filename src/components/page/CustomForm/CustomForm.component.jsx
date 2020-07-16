@@ -1,14 +1,18 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { Table, TableHead, TableRowHead, TableCellHead, TableCell, TableRow, TableBody, Button, InputField } from "@dhis2/ui-core"
+import { AlertBar, Table, TableHead, TableRowHead, TableCellHead, TableCell, TableRow, TableBody, Button, InputField } from "@dhis2/ui-core"
 import DetailsModal from '../modal/DetailsModal.component'
+import SaveModal from '../modal/SaveModal.component'
 import { validate } from '../../../helper'
-import ErrorsModal from '../modal/Errors.modal'
+import ErrorsModal from '../modal/ErrorModal.component'
+import { EVENT_APPROVED_DATA_ELEMENT, EVENT_TIME_APPROVED_DATA_ELEMENT } from '../../../helper/constants'
 
 
 const VIEW_DETAILS_MSG = "View details"
 const APPROVE_MSG = "Approve"
+const APPROVED_MSG = "Approved"
+const SUCCESS_MSG = "Saved successfully"
 
 const FIRST_NAME = "sB1IHYu2xQT"
 const MIDDLE_NAME = 'tMNem0PTfDv'
@@ -25,6 +29,10 @@ class CustomForm extends React.Component {
             viewDetails: false,
             viewErrorModal: false,
             selectedEvent: null,
+            everythingSaved: props.everythingSaved?props.everythingSaved: null,
+            dataStoreSaveSuccess: props.dataStoreSaveSuccess?props.dataStoreSaveSuccess: null,
+            savingDataStoreError: props.savingDataStoreError ? props.savingDataStoreError : null,
+            approvingEvent: props.approvingEvent ? props.approvingEvent : null,
             allEvents: props.allEvents,
             filters: {
                 firstNameSearch: props.filters && props.filtersfirstNameSearch ? props.filters.firstNameSerach : '',
@@ -69,7 +77,7 @@ class CustomForm extends React.Component {
     }
 
     handleErrorModalClose = () => {
-        this.setState({viewErrorModal: false,selectedEvent: null})
+        this.setState({ viewErrorModal: false, selectedEvent: null })
     }
 
     handleDetailsClick = (e) => {
@@ -78,12 +86,51 @@ class CustomForm extends React.Component {
     }
 
     handleErrorView = (e) => {
-        this.setState({viewErrorModal: true, selectedEvent: e})
+        this.setState({ viewErrorModal: true, selectedEvent: e })
         console.log("Error clicked", e)
     }
 
+    onEventSaveSuccess = (e)=>{
+        console.log("Event save successfull")
+        this.state.approvingEvent.event.dataValues[EVENT_APPROVED_DATA_ELEMENT]="true"
+        this.setState({
+            savingDataStoreError: null,
+            everythingSaved: true,
+            eventSaveSuccess: true,
+            approvingEvent: null
+        })
+    }
+
+    onEventSaveError = (e) =>{
+        console.log("Event save Error ",e);
+    }
+
+    onDataStoreSaveError = (e) => {
+        this.setState({ savingDataStoreError: "EROR: Specimen id already exists.", dataStoreSaveSuccess:false })
+        console.log("ERROR saving in dataStore", e)
+    }
+
+    onDataStoreSaveSuccess = (e) => {
+        console.log("SUCCESS", e)
+        this.setState({ dataStoreSaveSuccess: true })
+    }
+
+    handleSaveModalClose = (e) => {
+        this.setState({ approvingEvent: null })
+    }
+
     handleApprove = (e) => {
+        this.setState({ approvingEvent: e, dataStoreSaveSuccess: false })
+        console.log("theEvent", e)
         console.log("Approve clicked", e)
+    }
+
+    /**
+     * This is used to limit React from calling event save infinitely
+     * @param {*} e 
+     */
+    handleSavingEvent=(e)=>{
+        this.setState({dataStoreSaveSuccess: false})
     }
 
     clickedHead = (e) => {
@@ -104,6 +151,41 @@ class CustomForm extends React.Component {
                     <ErrorsModal errors={validate(this.state.selectedEvent, this.props.selectedProgram, this.props.selectedStage)} onClose={this.handleErrorModalClose}>
 
                     </ErrorsModal>
+                }
+                {
+                    this.state.approvingEvent &&
+                    <SaveModal
+                        specimenIdToSave={this.state.approvingEvent.event.dataValues[SPECIMEN_ID]}
+                        eventToApprove={this.state.approvingEvent}
+                        dataStoreSaveSuccess={this.state.dataStoreSaveSuccess}
+                        onEventSaveSuccess={this.onEventSaveSuccess}
+                        onEventSaveError={this.onEventSaveError}
+                        onDataStoreSaveSuccess={this.onDataStoreSaveSuccess}
+                        onDataStoreSaveError={this.onDataStoreSaveError}
+                        onClose={this.handleSaveModalClose}
+                        selectedProgram={this.props.selectedProgram}
+                        selectedStage={this.props.selectedStage}
+                        selectedLaboratory={this.props.selectedLaboratory}
+                        savingEvent={this.handleSavingEvent}
+                        dataStoreSavingError={this.state.savingDataStoreError}
+                    >
+
+                    </SaveModal>
+                }
+                {
+                    this.state.savingDataStoreError &&
+                    <AlertBar
+                        critical
+                        duration={8000}
+                        permanent
+                    >{this.state.savingDataStoreError}</AlertBar>
+                }
+                {
+                    this.state.everythingSaved &&
+                    <AlertBar
+                        success
+                        duration={5000}
+                    >{SUCCESS_MSG}</AlertBar>
                 }
                 {
                     <Table>
@@ -195,15 +277,17 @@ class CustomForm extends React.Component {
                                                     </Button>
                                                 </TableCell>
                                                 <TableCell>
-
                                                     {(errors.length === 0) &&
                                                         < Button
                                                             name="View details"
                                                             value="default"
                                                             type="button"
+                                                            disabled={ event.event.dataValues[EVENT_APPROVED_DATA_ELEMENT]==="true"?true:false}
                                                             primary
-                                                            onClick={this.handleApprove} >
-                                                            {APPROVE_MSG}
+                                                            onClick={
+                                                                () => this.handleApprove(event)
+                                                            } >
+                                                            {event.event.dataValues[EVENT_APPROVED_DATA_ELEMENT]==="true"?APPROVED_MSG: APPROVE_MSG}
                                                         </Button>
                                                     }
                                                     {
@@ -211,12 +295,12 @@ class CustomForm extends React.Component {
                                                         <Button
                                                             name="View details"
                                                             value="default"
-                                                            type="button" 
+                                                            type="button"
                                                             onClick={
-                                                                ()=>this.handleErrorView(event)
-                                                            } 
+                                                                () => this.handleErrorView(event)
+                                                            }
                                                             destructive>
-                                                                View error
+                                                            View error
                                                             </Button>
                                                     }
                                                 </TableCell>
@@ -237,6 +321,7 @@ const mapStateToProps = state => {
     return {
         selectedProgram: state.selectedDataReducer.selectedProgram,
         selectedStage: state.selectedDataReducer.selectedStage,
+        selectedLaboratory: state.selectedDataReducer.selectedLaboratory
     }
 }
 

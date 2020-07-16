@@ -27,7 +27,7 @@ const optionsQuery = {
     optionSets: {
         resource: 'optionSets',
         params: {
-            fields: 'id,displayName,code,options[id,displayName]',
+            fields: 'id,displayName,code,options[id,code,displayName]',
             paging: 'false',
         }
     }
