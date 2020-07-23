@@ -6,16 +6,24 @@ import { Card, SingleSelectField, SingleSelectOption, InputField, Button } from 
 import styles from './page.module.css'
 
 import NewForm from '../page/CustomForm/newForm.component'
-import { onSelectProgram, onSelectStage, onSelectLabSite, onSelectDuration, onSelectViewData } from '../../store/actions'
+import { onSelectProgram, onSelectStage, onSelectLabSite, onSelectDuration, onSelectViewData, onAllEventsChagned } from '../../store/actions'
 
 class Page extends React.Component {
 
     handleDayChange = (ref) => {
+        /**
+         * Make sure  data isn't displayed on change
+         */
+        this.props.setAllEvents([])
         this.props.onViewData(false)
         this.props.onDurationSelected(ref.value)
     }
 
     handleProgramChange = ({ selected }) => {
+        /**
+         * Make sure  data isn't displayed on change
+         */
+        this.props.setAllEvents([])
         this.props.onProgramSelected(this.props.programs[selected.value])
         //this.props.onDurationSelected('')
         this.props.onLabSiteSelected('')
@@ -23,12 +31,20 @@ class Page extends React.Component {
     }
 
     handleStageChange = ({ selected }) => {
+        /**
+         * Make sure  data isn't displayed on change
+         */
+        this.props.setAllEvents([])
         this.props.onStageSelected(this.props.selectedProgram.programStages[selected.value])
         this.props.onLabSiteSelected('')
         this.props.onViewData(false)
     }
 
     handleLabChange = ({ selected }) => {
+        /**
+         * Make sure  data isn't displayed on change
+         */
+        this.props.setAllEvents([])
         this.props.onLabSiteSelected(this.props.labSites.options[selected.value])
         this.props.onViewData(false)
         //this.setState({ selectedLab: this.props.labSites.options[selected.value], displayData: false })
@@ -185,7 +201,8 @@ const mapDispatchToProps = dispatch => {
         onStageSelected: (stg) => dispatch(onSelectStage(stg)),
         onLabSiteSelected: (lab) => dispatch(onSelectLabSite(lab)),
         onDurationSelected : (duration) => dispatch(onSelectDuration(duration)),
-        onViewData: (value) => dispatch(onSelectViewData(value))
+        onViewData: (value) => dispatch(onSelectViewData(value)),
+        setAllEvents: (allEvents) => dispatch(onAllEventsChagned(allEvents))
     }
 }
 

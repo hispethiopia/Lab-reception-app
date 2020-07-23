@@ -4,6 +4,7 @@ import {connect} from 'react-redux'
 
 import CustomForm from './CustomForm.component'
 import { getEvents, getTeis, mapTeiWithEvents } from '../../../hooks/useData'
+import {onAllEventsChagned} from '../../../store/actions'
 
 const teiQuery = {
     trackedEntityInstances: {
@@ -25,7 +26,7 @@ const NewForm = (props) => {
     const { loading:eventLoading, error:eventError, data:events } = getEvents(vars,props.dataElements)
     
     if(events && data){
-        remappedTeis=mapTeiWithEvents(data,events)
+        props.setAllEvents(mapTeiWithEvents(data,events))
     }
 
     return (
@@ -39,8 +40,8 @@ const NewForm = (props) => {
                 <span>Error</span>
             }
             {
-                remappedTeis &&
-                <CustomForm allEvents={remappedTeis}></CustomForm>
+                data &&
+                <CustomForm />
             }
         </>
     )
@@ -59,6 +60,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
+        setAllEvents: (allEvents) => dispatch(onAllEventsChagned(allEvents))
     }
 }
 

@@ -1,6 +1,6 @@
 import * as actionTypes from './actionTypes'
 
-export const onSelectOrgUnit = (orgUnit) =>{
+export const onSelectOrgUnit = (orgUnit) => {
     return {
         type: actionTypes.SELECTED_ORG_UNIT,
         selectedOrgUnit: orgUnit,
@@ -8,37 +8,44 @@ export const onSelectOrgUnit = (orgUnit) =>{
     }
 }
 
-export const onSelectProgram = (prgrm) =>{
+export const onSelectProgram = (prgrm) => {
     return {
         type: actionTypes.SELECTED_PROGRAM,
         selectedProgram: prgrm
     }
 }
 
-export const onSelectStage = (stg) =>{
+export const onSelectStage = (stg) => {
     return {
         type: actionTypes.SELECTED_STAGE,
         selectedStage: stg
     }
 }
 
-export const onSelectLabSite = (labSite) =>{
+export const onSelectLabSite = (labSite) => {
     return {
         type: actionTypes.SELECTED_LAB_SITE,
         selectedLaboratory: labSite
     }
 }
 
-export const onSelectDuration = (duration) =>{
+export const onSelectDuration = (duration) => {
     return {
         type: actionTypes.DURATION,
         selectedDuration: duration
     }
 }
 
-export const onSelectViewData = (viewData) =>{
+export const onSelectViewData = (viewData) => {
     return {
         type: actionTypes.VIEW_DATA,
         viewData: viewData
+    }
+}
+
+export const onAllEventsChagned = (allEvents) => {
+    return {
+        type: actionTypes.ALL_EVENTS_CHANGED,
+        allEvents: allEvents
     }
 }

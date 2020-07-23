@@ -6,7 +6,8 @@ const initialState = {
     selectedStage: '',
     selectedLabSite: '',
     selectedDuration: '1',
-    viewData: false
+    viewData: false,
+    allEvents: ''
 
 }
 
@@ -16,7 +17,7 @@ const selectedDataReducer = (state = initialState, action) => {
             return {
                 ...state,
                 selectedOrgUnit: action.selectedOrgUnit,
-                viewData: false
+                    viewData: false
             };
         case actionTypes.SELECTED_PROGRAM:
             return {
@@ -42,6 +43,11 @@ const selectedDataReducer = (state = initialState, action) => {
             return {
                 ...state,
                 viewData: action.viewData
+            };
+        case actionTypes.ALL_EVENTS_CHANGED:
+            return {
+                ...state,
+                allEvents: action.allEvents
             };
         default:
             return state;

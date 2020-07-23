@@ -1,4 +1,5 @@
 import React from 'react'
+import {connect} from 'react-redux'
 
 import {
     Modal,
@@ -6,7 +7,7 @@ import {
     ModalContent,
     ModalActions,
     Button,
-    AlertBar
+    NoticeBox
 } from "@dhis2/ui"
 import { saveSpecimenIdInDataStore, approveEventOnServer } from '../../../hooks/useSaver'
 
@@ -40,6 +41,13 @@ const SaveModal = (props) => {
             <ModalContent>
                 Are you sure you want to save?
             </ModalContent>
+            {
+                props.dataStoreSavingError &&
+                <NoticeBox error title="ERROR">
+                    Specimen ID already exists
+                </NoticeBox>
+
+            }
             <ModalActions>
                 <Button onClick={props.onClose} type="button" secondary>
                     Close
@@ -52,5 +60,19 @@ const SaveModal = (props) => {
     )
 }
 
-export default SaveModal
+
+const mapStateToProps = state => {
+    return {
+        selectedProgram: state.selectedDataReducer.selectedProgram,
+        selectedStage: state.selectedDataReducer.selectedStage,
+        selectedLaboratory: state.selectedDataReducer.selectedLaboratory
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(SaveModal)
 

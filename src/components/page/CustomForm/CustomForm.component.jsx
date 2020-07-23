@@ -33,27 +33,25 @@ class CustomForm extends React.Component {
             dataStoreSaveSuccess: props.dataStoreSaveSuccess?props.dataStoreSaveSuccess: null,
             savingDataStoreError: props.savingDataStoreError ? props.savingDataStoreError : null,
             approvingEvent: props.approvingEvent ? props.approvingEvent : null,
-            allEvents: props.allEvents,
             filters: {
                 firstNameSearch: props.filters && props.filtersfirstNameSearch ? props.filters.firstNameSerach : '',
                 middleNameSearch: props.filters && props.filtersmiddleNameSearch ? props.filters.middleNameSearch : '',
                 lastNameSearch: props.filters && props.filterslastNameSearch ? props.filters.lastNameSearch : '',
                 phoneSearch: props.filters && props.filtersphoneSearch ? props.filters.phoneSearch : '',
                 specimenIdSearch: props.filters && props.filtersspecimenIdSearch ? props.filters.specimenIdSearch : ''
-            },
-            filteredEvents: props.filteredEvents ? props.filteredEvents : props.allEvents
+            }
         }
     }
 
-    filterEvents = (allEvents, filters) => {
+    filterEvents = ( filters) => {
         if (!filters) {
-            return [...allEvents]
+            return [...this.props.allEvents]
         }
-        if (!allEvents || allEvents && allEvents.length < 1) {
+        if (!this.props.allEvents || this.props.allEvents && this.props.allEvents.length < 1) {
             return []
         }
 
-        var array = allEvents.filter(event => {
+        var array = this.props.allEvents.filter(event => {
             return (
                 (filters.firstNameSearch === "" || (event.trackedEntityInstance.attributes[FIRST_NAME] && event.trackedEntityInstance.attributes[FIRST_NAME].toLowerCase().includes(filters.firstNameSearch.toLowerCase()))) &&
                 (filters.middleNameSearch === "" || (event.trackedEntityInstance.attributes[MIDDLE_NAME] && event.trackedEntityInstance.attributes[MIDDLE_NAME].toLowerCase().includes(filters.middleNameSearch.toLowerCase()))) &&
@@ -69,7 +67,7 @@ class CustomForm extends React.Component {
     onChange = (ref, fieldName) => {
         var filters = { ... this.state.filters }
         filters[fieldName] = ref.value
-        this.setState({ filters: filters, allEvents: this.state.allEvents, filteredEvents: this.filterEvents(this.state.allEvents, filters) })
+        this.setState({ filters: filters })
     }
 
     handleModalClose = () => {
@@ -173,21 +171,6 @@ class CustomForm extends React.Component {
                     </SaveModal>
                 }
                 {
-                    this.state.savingDataStoreError &&
-                    <AlertBar
-                        critical
-                        duration={8000}
-                        permanent
-                    >{this.state.savingDataStoreError}</AlertBar>
-                }
-                {
-                    this.state.everythingSaved &&
-                    <AlertBar
-                        success
-                        duration={5000}
-                    >{SUCCESS_MSG}</AlertBar>
-                }
-                {
                     <Table>
                         <TableHead>
                             <TableRowHead>
@@ -242,7 +225,7 @@ class CustomForm extends React.Component {
                         </TableHead>
                         <TableBody>
                             {
-                                this.state.filteredEvents.map((event, mapIndex) => {
+                                this.filterEvents(this.state.filters).map((event, mapIndex) => {
                                     var errors = validate(event, this.props.selectedProgram, this.props.selectedStage)
                                     if (mapIndex < 50) // render only the first 50 elements, because UI is very heavy
                                         return (
@@ -321,7 +304,8 @@ const mapStateToProps = state => {
     return {
         selectedProgram: state.selectedDataReducer.selectedProgram,
         selectedStage: state.selectedDataReducer.selectedStage,
-        selectedLaboratory: state.selectedDataReducer.selectedLaboratory
+        selectedLaboratory: state.selectedDataReducer.selectedLaboratory,
+        allEvents: state.selectedDataReducer.allEvents
     }
 }
 

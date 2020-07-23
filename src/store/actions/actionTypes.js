@@ -25,3 +25,5 @@ export const DURATION = "DURATION"
 export const SELECTED_LAB_SITE = "SELECTED_LAB_SITE"
 
 export const VIEW_DATA = "VIEW_DATA"
+
+export const ALL_EVENTS_CHANGED = "ALL_EVENTS_CHANGED"

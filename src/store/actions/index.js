@@ -4,7 +4,8 @@ export {
     onSelectStage,
     onSelectDuration,
     onSelectLabSite,
-    onSelectViewData
+    onSelectViewData,
+    onAllEventsChagned
 } from './selected'
 
 export {
