@@ -91,11 +91,14 @@ class CustomForm extends React.Component {
     onEventSaveSuccess = (e)=>{
         console.log("Event save successfull")
         this.state.approvingEvent.event.dataValues[EVENT_APPROVED_DATA_ELEMENT]="true"
+        var filters = {...this.state.filters}
+        filters.specimenIdSearch = ""
         this.setState({
             savingDataStoreError: null,
             everythingSaved: true,
             eventSaveSuccess: true,
-            approvingEvent: null
+            approvingEvent: null,
+            filters: filters
         })
     }
 
@@ -171,6 +174,7 @@ class CustomForm extends React.Component {
                     </SaveModal>
                 }
                 {
+                    !this.state.viewDetails && !this.state.viewErrorModal && !this.state.approvingEvent  &&
                     <Table>
                         <TableHead>
                             <TableRowHead>
@@ -214,7 +218,7 @@ class CustomForm extends React.Component {
                                     </InputField>
                                 </TableCellHead>
                                 <TableCellHead>
-                                    <InputField onChange={(ref) => this.onChange(ref, 'specimenIdSearch')} value={this.state.filters.specimenIdSearch}>
+                                    <InputField initialFocus onChange={(ref) => this.onChange(ref, 'specimenIdSearch')} value={this.state.filters.specimenIdSearch}>
                                     </InputField>
                                 </TableCellHead>
                                 <TableCellHead>
