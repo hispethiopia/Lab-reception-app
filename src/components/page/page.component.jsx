@@ -1,12 +1,14 @@
 import React, { useCallback } from 'react'
-import {connect} from 'react-redux'
+import { connect } from 'react-redux'
 
 import { Card, SingleSelectField, SingleSelectOption, InputField, Button } from "@dhis2/ui-core"
 
 import styles from './page.module.css'
 
-import NewForm from '../page/CustomForm/newForm.component'
 import { onSelectProgram, onSelectStage, onSelectLabSite, onSelectDuration, onSelectViewData, onAllEventsChagned } from '../../store/actions'
+import RequestForm from './CustomForm/RequestForm.component'
+import ResultForm from './CustomForm/ResultForm.component'
+import { LAB_REQUEST_STAGE_ID, LAB_RESULT_STAGE_ID } from '../../helper/constants'
 
 class Page extends React.Component {
 
@@ -164,15 +166,12 @@ class Page extends React.Component {
                 <Card>
                     <div className={styles.content}>
                         {
-                            this.props.viewData &&
-                            <NewForm></NewForm>
-                            /*
-                                <CustomForm
-                                    selectedProgram={this.state.selectedProgram}
-                                    selectedStage={this.state.selectedStage}
-                                    selectedLab={this.state.selectedLab}
-                                    dateDuration={this.dateDuration}
-                                />*/
+                            this.props.viewData && this.props.selectedStage.id === LAB_REQUEST_STAGE_ID &&
+                            <RequestForm></RequestForm>
+                        }
+                        {
+                            this.props.viewData && this.props.selectedStage.id === LAB_RESULT_STAGE_ID &&
+                            <ResultForm></ResultForm>
                         }
                     </div>
                 </Card>
@@ -200,11 +199,11 @@ const mapDispatchToProps = dispatch => {
         onProgramSelected: (prg) => dispatch(onSelectProgram(prg)),
         onStageSelected: (stg) => dispatch(onSelectStage(stg)),
         onLabSiteSelected: (lab) => dispatch(onSelectLabSite(lab)),
-        onDurationSelected : (duration) => dispatch(onSelectDuration(duration)),
+        onDurationSelected: (duration) => dispatch(onSelectDuration(duration)),
         onViewData: (value) => dispatch(onSelectViewData(value)),
         setAllEvents: (allEvents) => dispatch(onAllEventsChagned(allEvents))
     }
 }
 
 
-export default connect(mapStateToProps,mapDispatchToProps)(Page)
+export default connect(mapStateToProps, mapDispatchToProps)(Page)

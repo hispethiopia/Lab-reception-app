@@ -13,7 +13,7 @@ const teiQuery = {
     }
 }
 
-const NewForm = (props) => {
+const RequestForm = (props) => {
     const vars = {
         selectedOrgUnit: props.selectedOrgUnit.id,
         selectedDuration: props.selectedDuration,
@@ -21,7 +21,7 @@ const NewForm = (props) => {
         selectedStage: props.selectedStage.id,
         ouMode: "SELECTED"
     } 
-    var remappedTeis =null;
+    
     const { loading, error, data } = getTeis(vars,props.dataElements)
     const { loading:eventLoading, error:eventError, data:events } = getEvents(vars,props.dataElements)
     
@@ -64,4 +64,4 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(NewForm)
+export default connect(mapStateToProps, mapDispatchToProps)(RequestForm)

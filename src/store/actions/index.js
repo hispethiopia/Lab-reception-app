@@ -12,5 +12,6 @@ export {
     setPrograms,
     setStages,
     setOptionSets,
-    setDataElements
+    setDataElements,
+    setLabResultOptionSet
 } from './static'

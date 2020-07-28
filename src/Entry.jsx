@@ -9,9 +9,9 @@ import Sidebar from './components/Sidebar/Sidebar.component'
 import { connect } from 'react-redux'
 
 import styles from './App.module.css'
-import { setPrograms, setStages, setOptionSets, setDataElements } from './store/actions'
+import { setPrograms, setStages, setOptionSets, setDataElements, setLabResultOptionSet } from './store/actions'
 
-import {LAB_SITES_OPTION_SET_CODE} from './helper/constants'
+import {LAB_SITES_OPTION_SET_CODE, LAB_RESULTS_OPTION_SET_CODE} from './helper/constants'
 
 const EntryPoint = (props) => {
     const { loading: loadingPrograms, error: programsError, data: programs } = useMetadata(PROGRAMS);
@@ -31,6 +31,7 @@ const EntryPoint = (props) => {
         }
         if (!loadingOptionSets && optionSets && optionSets !== props.optionSets) {
             props.setAllOptionSets(optionSets)
+            props.setLabResultOptionSet(optionSets.filter(os=>{return os.code===LAB_RESULTS_OPTION_SET_CODE})[0])
         }
         if (!loadingDataElements && dataElements && dataElements !== props.dataElements) {
             props.setAllDataElements(dataElements)
@@ -85,7 +86,8 @@ const mapStateToProps = state => {
         programs: state.staticDataReducer.programs,
         stages: state.staticDataReducer.stages,
         optionSets: state.staticDataReducer.optionSets,
-        dataElements: state.staticDataReducer.dataElements
+        dataElements: state.staticDataReducer.dataElements,
+        labResultsOptionSet: state.staticDataReducer.labResultsOptionSet
 
     }
 }
@@ -95,7 +97,8 @@ const mapDispatchToProps = dispatch => {
         setAllPrograms: (prgs) => dispatch(setPrograms(prgs)),
         setAllStages: (stgs) => dispatch(setStages(stgs)),
         setAllOptionSets: (optnSets) => dispatch(setOptionSets(optnSets)),
-        setAllDataElements: (dataElements) => dispatch(setDataElements(dataElements))
+        setAllDataElements: (dataElements) => dispatch(setDataElements(dataElements)),
+        setLabResultOptionSet: (labResultsOption)=>dispatch(setLabResultOptionSet(labResultsOption))
     }
 }
 

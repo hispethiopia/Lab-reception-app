@@ -3,10 +3,16 @@ import {
     useDataEngine
 } from '@dhis2/app-runtime'
 
+import {
+    SPECIMEN_ID_DATA_ELEMENT_IN_REQUEST,
+    SPECIMEN_ID_DATA_ELEMENT_IN_RESULT,
+    EVENT_APPROVED_DATA_ELEMENT
+} from '../helper/constants'
+
 
 const makeIdIndexed = (objs, fieldName) => {
     objs.forEach(obj => {
-        obj[obj[fieldName]] = obj
+        objs[obj[fieldName]] = obj
     });
 }
 
@@ -67,7 +73,7 @@ const extractTeiParams = ({
 const getEvents = (params, allDataElements) => {
     var engine = useDataQuery;
     var eventParams = extractEventParams(params)
-    eventParams.fields = "trackedEntityInstance,event,orgUnit,completedDate,status,dataValues[dataElement,value]"
+    eventParams.fields = "programStage,trackedEntityInstance,event,orgUnit,completedDate,status,dataValues[dataElement,value]"
 
     const {
         loading,
@@ -83,12 +89,13 @@ const getEvents = (params, allDataElements) => {
 
     if (data) {
         makeIdIndexed(data.events.events, "event");
-        data.events.events.forEach(event=>{
-            event.dataValues.forEach(dataValue=>{
-                event.dataValues[dataValue.dataElement]=dataValue.value
+        data.events.events.forEach(event => {
+            event.dataValues.forEach(dataValue => {
+                event.dataValues[dataValue.dataElement] = dataValue.value
             })
         })
     }
+
 
     return {
         loading,
@@ -121,8 +128,8 @@ const getTeis = (params, allDataElements) => {
     if (data) {
         makeIdIndexed(data.trackedEntityInstances.trackedEntityInstances, "trackedEntityInstances");
         data.trackedEntityInstances.trackedEntityInstances.forEach(tei => {
-            tei.attributes.forEach(attribute=>{
-                tei.attributes[attribute.attribute]=attribute.value
+            tei.attributes.forEach(attribute => {
+                tei.attributes[attribute.attribute] = attribute.value
             })
         });
     }
@@ -136,23 +143,68 @@ const getTeis = (params, allDataElements) => {
 const mapTeiWithEvents = (teis, events) => {
     var remappedValue = []
     teis.forEach(tei => {
-        var eventsInTei = events.filter(event=>{
+        var eventsInTei = events.filter(event => {
             return event.trackedEntityInstance === tei.trackedEntityInstance
         })
-        if(eventsInTei.length===0){
-            remappedValue.push({trackedEntityInstance:{...tei},event:null})
-        }else{
-            eventsInTei.forEach(validEvent=>{
-                remappedValue.push({trackedEntityInstance:{...tei},event:{...validEvent}})
+        if (eventsInTei.length === 0) {
+            remappedValue.push({
+                trackedEntityInstance: {
+                    ...tei
+                },
+                event: null
+            })
+        } else {
+            eventsInTei.forEach(validEvent => {
+                remappedValue.push({
+                    trackedEntityInstance: {
+                        ...tei
+                    },
+                    event: {
+                        ...validEvent
+                    }
+                })
             })
         }
     })
     return remappedValue
 }
 
+const mapTeiWithResultAndRequest = ({
+    teis,
+    requests,
+    results
+}) => {
+    //First map and get all the requests.
+    let remappedValue = mapTeiWithEvents(teis, requests)
+
+    
+    //filter only the approved events and set a new field in the event called receivedResult.
+    let approvedReqeusts = remappedValue.filter(request => {
+        if(request.event && request.event.dataValues && request.event.dataValues[EVENT_APPROVED_DATA_ELEMENT]){
+            //this means that the reqeust is an approved request, we can now look for a result for it.
+            results.forEach(result =>{
+                if(result.trackedEntityInstance === request.event.trackedEntityInstance && 
+                    result.dataValues[SPECIMEN_ID_DATA_ELEMENT_IN_RESULT]=== request.event.dataValues[SPECIMEN_ID_DATA_ELEMENT_IN_REQUEST]){
+                        //This means that this specific event has a result inserted into it. so add received result field in it.
+                        request.event.receivedResult = true;
+                        request.resultEvent=result
+                    }
+            })
+            if(!request.event.receivedResult){
+                //This means result hasn't been received on the event.
+                request.event.receivedResult=false;
+            }
+            return true;
+        }else{
+            return false;
+        }
+    })
+    return approvedReqeusts
+}
 
 export {
     getEvents,
     getTeis,
-    mapTeiWithEvents
+    mapTeiWithEvents,
+    mapTeiWithResultAndRequest
 }

@@ -1,24 +1,17 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { AlertBar, Table, TableHead, TableRowHead, TableCellHead, TableCell, TableRow, TableBody, Button, InputField } from "@dhis2/ui-core"
+import { Table, TableHead, TableRowHead, TableCellHead, TableBody, InputField } from "@dhis2/ui-core"
 import DetailsModal from '../modal/DetailsModal.component'
 import SaveModal from '../modal/SaveModal.component'
 import { validate } from '../../../helper'
 import ErrorsModal from '../modal/ErrorModal.component'
-import { EVENT_APPROVED_DATA_ELEMENT, EVENT_TIME_APPROVED_DATA_ELEMENT } from '../../../helper/constants'
+import { EVENT_APPROVED_DATA_ELEMENT, FIRST_NAME, MIDDLE_NAME, LAST_NAME, PHONE_NUMBER, SPECIMEN_ID_DATA_ELEMENT_IN_REQUEST, LAB_REQUEST_STAGE_ID, LAB_RESULT_STAGE_ID } from '../../../helper/constants'
+import RequestApprove from './RequestApproveField.component'
+import ResultApprove from './ResultApprove.component'
+import SaveResultModal from '../modal/SaveResultModal.component'
 
 
-const VIEW_DETAILS_MSG = "View details"
-const APPROVE_MSG = "Approve"
-const APPROVED_MSG = "Approved"
-const SUCCESS_MSG = "Saved successfully"
-
-const FIRST_NAME = "sB1IHYu2xQT"
-const MIDDLE_NAME = 'tMNem0PTfDv'
-const LAST_NAME = 'ENRjVGxVL6l'
-const PHONE_NUMBER = 'fctSQp5nAYl'
-const SPECIMEN_ID = 'EzzNZEGoppH'
 
 
 class CustomForm extends React.Component {
@@ -29,10 +22,14 @@ class CustomForm extends React.Component {
             viewDetails: false,
             viewErrorModal: false,
             selectedEvent: null,
-            everythingSaved: props.everythingSaved?props.everythingSaved: null,
-            dataStoreSaveSuccess: props.dataStoreSaveSuccess?props.dataStoreSaveSuccess: null,
+            everythingSaved: props.everythingSaved ? props.everythingSaved : null,
+            resultSaveSuccess: props.resultSaveSuccess ? props.resultSaveSuccess : null,
+            savingResultError: props.savingResultError ? props.savingResultError : null,
+            dataStoreSaveSuccess: props.dataStoreSaveSuccess ? props.dataStoreSaveSuccess : null,
             savingDataStoreError: props.savingDataStoreError ? props.savingDataStoreError : null,
             approvingEvent: props.approvingEvent ? props.approvingEvent : null,
+            savingEvent: props.savingEvent ? props.savingEvent : null,
+            selectedResult: props.selectedResult ? props.selectedResult : null,
             filters: {
                 firstNameSearch: props.filters && props.filtersfirstNameSearch ? props.filters.firstNameSerach : '',
                 middleNameSearch: props.filters && props.filtersmiddleNameSearch ? props.filters.middleNameSearch : '',
@@ -43,7 +40,7 @@ class CustomForm extends React.Component {
         }
     }
 
-    filterEvents = ( filters) => {
+    filterEvents = (filters) => {
         if (!filters) {
             return [...this.props.allEvents]
         }
@@ -57,14 +54,14 @@ class CustomForm extends React.Component {
                 (filters.middleNameSearch === "" || (event.trackedEntityInstance.attributes[MIDDLE_NAME] && event.trackedEntityInstance.attributes[MIDDLE_NAME].toLowerCase().includes(filters.middleNameSearch.toLowerCase()))) &&
                 (filters.lastNameSearch === "" || (event.trackedEntityInstance.attributes[LAST_NAME] && event.trackedEntityInstance.attributes[LAST_NAME].toLowerCase().includes(filters.lastNameSearch.toLowerCase()))) &&
                 (filters.phoneSearch === "" || (event.trackedEntityInstance.attributes[PHONE_NUMBER] && event.trackedEntityInstance.attributes[PHONE_NUMBER].toLowerCase().includes(filters.phoneSearch.toLowerCase()))) &&
-                (filters.specimenIdSearch === "" || (event.event && event.event.dataValues[SPECIMEN_ID] && event.event.dataValues[SPECIMEN_ID].toLowerCase().includes(filters.specimenIdSearch.toLowerCase())))
+                (filters.specimenIdSearch === "" || (event.event && event.event.dataValues[SPECIMEN_ID_DATA_ELEMENT_IN_REQUEST] && event.event.dataValues[SPECIMEN_ID_DATA_ELEMENT_IN_REQUEST].toLowerCase().includes(filters.specimenIdSearch.toLowerCase())))
             )
         })
 
         return array
     }
 
-    onChange = (ref, fieldName) => {
+    onChangeFilter = (ref, fieldName) => {
         var filters = { ... this.state.filters }
         filters[fieldName] = ref.value
         this.setState({ filters: filters })
@@ -79,19 +76,39 @@ class CustomForm extends React.Component {
     }
 
     handleDetailsClick = (e) => {
-        console.log("Details clicked ", e)
         this.setState({ viewDetails: true, selectedEvent: e })
     }
 
     handleErrorView = (e) => {
         this.setState({ viewErrorModal: true, selectedEvent: e })
-        console.log("Error clicked", e)
     }
 
-    onEventSaveSuccess = (e)=>{
-        console.log("Event save successfull")
-        this.state.approvingEvent.event.dataValues[EVENT_APPROVED_DATA_ELEMENT]="true"
-        var filters = {...this.state.filters}
+    onResultSaveError = (e) => {
+        console.error("ERROR saving result event", e)
+        this.setState({ savingResultError: "ERROR: Saving result error.", resultSaveSuccess: false })
+    }
+
+    onResultSaveSuccess = (e, data) => {
+        this.state.savingEvent.event.receivedResult = true;
+        data.dataValues.forEach(dataValue=>{
+            data.dataValues[dataValue.dataElement] = dataValue.value
+        })
+        this.state.savingEvent.resultEvent = data;
+
+        var filters = { ...this.state.filters }
+        filters.specimenIdSearch = ""
+        this.setState({
+            savingEvent: null,
+            resultSaveSuccess: true,
+            savingResultError: false,
+            filters: filters,
+
+        })
+    }
+
+    onEventSaveSuccess = (e) => {
+        this.state.approvingEvent.event.dataValues[EVENT_APPROVED_DATA_ELEMENT] = "true"
+        var filters = { ...this.state.filters }
         filters.specimenIdSearch = ""
         this.setState({
             savingDataStoreError: null,
@@ -102,17 +119,17 @@ class CustomForm extends React.Component {
         })
     }
 
-    onEventSaveError = (e) =>{
-        console.log("Event save Error ",e);
+    onEventSaveError = (e) => {
+        console.log("Event save Error ", e);
     }
 
     onDataStoreSaveError = (e) => {
-        this.setState({ savingDataStoreError: "EROR: Specimen id already exists.", dataStoreSaveSuccess:false })
+        this.setState({ savingDataStoreError: "EROR: Specimen id already exists.", dataStoreSaveSuccess: false })
         console.log("ERROR saving in dataStore", e)
     }
 
     onDataStoreSaveSuccess = (e) => {
-        console.log("SUCCESS", e)
+        console.log("Data store save successful", e)
         this.setState({ dataStoreSaveSuccess: true })
     }
 
@@ -120,18 +137,21 @@ class CustomForm extends React.Component {
         this.setState({ approvingEvent: null })
     }
 
-    handleApprove = (e) => {
-        this.setState({ approvingEvent: e, dataStoreSaveSuccess: false })
-        console.log("theEvent", e)
-        console.log("Approve clicked", e)
+    handleSaveResultModalClose = (e) => {
+        this.setState({ savingEvent: null })
     }
 
-    /**
-     * This is used to limit React from calling event save infinitely
-     * @param {*} e 
-     */
-    handleSavingEvent=(e)=>{
-        this.setState({dataStoreSaveSuccess: false})
+    handleApprove = (e) => {
+        this.setState({ approvingEvent: e, dataStoreSaveSuccess: false })
+    }
+
+    handleResultChange = (selection, event) => {
+        this.setState({ savingEvent: event, selectedResult: selection.selected })
+    }
+
+
+    handleSavingEvent = (e) => {
+        this.setState({ dataStoreSaveSuccess: false })
     }
 
     clickedHead = (e) => {
@@ -156,7 +176,7 @@ class CustomForm extends React.Component {
                 {
                     this.state.approvingEvent &&
                     <SaveModal
-                        specimenIdToSave={this.state.approvingEvent.event.dataValues[SPECIMEN_ID]}
+                        specimenIdToSave={this.state.approvingEvent.event.dataValues[SPECIMEN_ID_DATA_ELEMENT_IN_REQUEST]}
                         eventToApprove={this.state.approvingEvent}
                         dataStoreSaveSuccess={this.state.dataStoreSaveSuccess}
                         onEventSaveSuccess={this.onEventSaveSuccess}
@@ -174,7 +194,20 @@ class CustomForm extends React.Component {
                     </SaveModal>
                 }
                 {
-                    !this.state.viewDetails && !this.state.viewErrorModal && !this.state.approvingEvent  &&
+                    this.state.savingEvent &&
+                    <SaveResultModal
+                        savingEvent={this.state.savingEvent}
+                        onClose={this.handleSaveResultModalClose}
+                        selectedLaboratory={this.props.selectedLaboratory}
+                        selectedResult={this.state.selectedResult}
+                        savingResultError={this.state.savingResultError}
+                        onEventSaveSuccess={this.onResultSaveSuccess}
+                        onEventSaveError={this.onResultSaveError}
+                    />
+                }
+
+                {
+                    !this.state.viewDetails && !this.state.viewErrorModal && !this.state.approvingEvent && !this.state.savingEvent &&
                     <Table>
                         <TableHead>
                             <TableRowHead>
@@ -202,23 +235,23 @@ class CustomForm extends React.Component {
                             </TableRowHead>
                             <TableRowHead>
                                 <TableCellHead onClick={this.clickedHead}>
-                                    <InputField onChange={(ref) => this.onChange(ref, 'firstNameSearch')} value={this.state.filters.firstNameSearch}>
+                                    <InputField onChange={(ref) => this.onChangeFilter(ref, 'firstNameSearch')} value={this.state.filters.firstNameSearch}>
                                     </InputField>
                                 </TableCellHead>
                                 <TableCellHead >
-                                    <InputField onChange={(ref) => this.onChange(ref, 'middleNameSearch')} value={this.state.filters.middleNameSearch}>
+                                    <InputField onChange={(ref) => this.onChangeFilter(ref, 'middleNameSearch')} value={this.state.filters.middleNameSearch}>
                                     </InputField>
                                 </TableCellHead>
                                 <TableCellHead >
-                                    <InputField onChange={(ref) => this.onChange(ref, 'lastNameSearch')} value={this.state.filters.lastNameSearch}>
+                                    <InputField onChange={(ref) => this.onChangeFilter(ref, 'lastNameSearch')} value={this.state.filters.lastNameSearch}>
                                     </InputField>
                                 </TableCellHead>
                                 <TableCellHead>
-                                    <InputField onChange={(ref) => this.onChange(ref, 'phoneSearch')} value={this.state.filters.phoneSearch}>
+                                    <InputField onChange={(ref) => this.onChangeFilter(ref, 'phoneSearch')} value={this.state.filters.phoneSearch}>
                                     </InputField>
                                 </TableCellHead>
                                 <TableCellHead>
-                                    <InputField initialFocus onChange={(ref) => this.onChange(ref, 'specimenIdSearch')} value={this.state.filters.specimenIdSearch}>
+                                    <InputField initialFocus onChange={(ref) => this.onChangeFilter(ref, 'specimenIdSearch')} value={this.state.filters.specimenIdSearch}>
                                     </InputField>
                                 </TableCellHead>
                                 <TableCellHead>
@@ -228,72 +261,37 @@ class CustomForm extends React.Component {
                             </TableRowHead>
                         </TableHead>
                         <TableBody>
-                            {
-                                this.filterEvents(this.state.filters).map((event, mapIndex) => {
+                            {this.filterEvents(this.state.filters).map((event, mapIndex) => {
+                                if (this.props.selectedStage.id === LAB_REQUEST_STAGE_ID) {
                                     var errors = validate(event, this.props.selectedProgram, this.props.selectedStage)
                                     if (mapIndex < 50) // render only the first 50 elements, because UI is very heavy
+                                    {
                                         return (
-                                            < TableRow key={(event.trackedEntityInstance.trackedEntityInstance + (event.event !== null ? event.event.event : ""))} >
-                                                <TableCell>
-                                                    {event.trackedEntityInstance.attributes[FIRST_NAME]}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {event.trackedEntityInstance.attributes[MIDDLE_NAME]}
-                                                </TableCell>
+                                            <RequestApprove
+                                                initialFocus
+                                                key={"event_" + mapIndex}
+                                                event={event}
+                                                handleApprove={this.handleApprove}
+                                                handleErrorView={this.handleErrorView}
+                                                handleDetailsClick={this.handleDetailsClick}
+                                                errors={errors}
+                                            />)
+                                    }
+                                } else if (this.props.selectedStage.id === LAB_RESULT_STAGE_ID) {
+                                    return (
+                                        <ResultApprove
+                                            initialFocus
+                                            key={"event_" + mapIndex}
 
-                                                <TableCell>
-                                                    {event.trackedEntityInstance.attributes[LAST_NAME]}
-                                                </TableCell>
+                                            event={event}
+                                            handleResultChange={this.handleResultChange}
+                                            handleErrorView={this.handleErrorView}
+                                            handleDetailsClick={this.handleDetailsClick}
+                                        />
+                                    )
+                                }
 
-                                                <TableCell>
-                                                    {event.trackedEntityInstance.attributes[PHONE_NUMBER]}
-                                                </TableCell>
-
-                                                <TableCell>
-                                                    {event.event && event.event.dataValues[SPECIMEN_ID]}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        name="View details"
-                                                        value="default"
-                                                        type="button"
-                                                        onClick={
-                                                            () => this.handleDetailsClick(event)
-                                                        } >
-                                                        {VIEW_DETAILS_MSG}
-                                                    </Button>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {(errors.length === 0) &&
-                                                        < Button
-                                                            name="View details"
-                                                            value="default"
-                                                            type="button"
-                                                            disabled={ event.event.dataValues[EVENT_APPROVED_DATA_ELEMENT]==="true"?true:false}
-                                                            primary
-                                                            onClick={
-                                                                () => this.handleApprove(event)
-                                                            } >
-                                                            {event.event.dataValues[EVENT_APPROVED_DATA_ELEMENT]==="true"?APPROVED_MSG: APPROVE_MSG}
-                                                        </Button>
-                                                    }
-                                                    {
-                                                        (errors.length > 0) &&
-                                                        <Button
-                                                            name="View details"
-                                                            value="default"
-                                                            type="button"
-                                                            onClick={
-                                                                () => this.handleErrorView(event)
-                                                            }
-                                                            destructive>
-                                                            View error
-                                                            </Button>
-                                                    }
-                                                </TableCell>
-                                            </TableRow>
-                                        )
-                                })
+                            })
                             }
                         </TableBody>
                     </Table>

@@ -11,6 +11,8 @@ export const OPTION_SETS = 'OPTION_SETS'
 
 export const DATA_ELEMENTS = 'DATA_ELEMENTS'
 
+export const LAB_RESULTS_OPTION_SET = "LAB_RESULTS_OPTION_SET"
+
 /**
  * Action for accessing selected program
  */

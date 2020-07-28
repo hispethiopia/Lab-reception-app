@@ -30,6 +30,11 @@ const staticDataReducer = (state = initialState, action) => {
                 ...state,
                 dataElements: action.dataElements
             };
+        case actionTypes.LAB_RESULTS_OPTION_SET:
+            return {
+                ...state,
+                labResultsOptionSet: action.labResultsOptionSet
+            };
         default:
             return state
     }
