@@ -13,6 +13,8 @@ export const DATA_ELEMENTS = 'DATA_ELEMENTS'
 
 export const LAB_RESULTS_OPTION_SET = "LAB_RESULTS_OPTION_SET"
 
+export const ME_VARIABLE = "ME_VARIABLE"
+
 /**
  * Action for accessing selected program
  */

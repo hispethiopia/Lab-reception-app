@@ -13,5 +13,6 @@ export {
     setStages,
     setOptionSets,
     setDataElements,
-    setLabResultOptionSet
+    setLabResultOptionSet,
+    setMe
 } from './static'

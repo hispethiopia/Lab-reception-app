@@ -27,8 +27,15 @@ export const setDataElements = (dataElements) => {
 }
 
 export const setLabResultOptionSet = (resultOptionSets) => {
-return{
-    type: actionTypes.LAB_RESULTS_OPTION_SET,
-    labResultsOptionSet:resultOptionSets
+    return {
+        type: actionTypes.LAB_RESULTS_OPTION_SET,
+        labResultsOptionSet: resultOptionSets
+    }
 }
+
+export const setMe = (me)=>{
+    return {
+        type: actionTypes.ME_VARIABLE,
+        meVariable: me
+    }
 }

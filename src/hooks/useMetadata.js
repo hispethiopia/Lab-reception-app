@@ -1,11 +1,22 @@
 import {
     useDataQuery
 } from '@dhis2/app-runtime'
+import {
+    LAB_REQUEST_STAGE_ID,
+    LAB_RESULT_STAGE_ID
+} from '../helper/constants'
 
 const PROGRAMS = "programs"
 const PROGRAM_STAGES = "programStages"
 const OPTION_SETS = "optionSets"
 const DATA_ELEMENTS = 'dataElements'
+const ME = 'me'
+
+const meQuery = {
+    me: {
+        resource: 'me'
+    }
+}
 
 const trackedAttributeQuery = {
     trackedEntityAttributes: {
@@ -17,7 +28,7 @@ const stagesQuery = {
     programStages: {
         resource: 'programStages',
         params: {
-            fields: 'id,displayName,program[id],programStageDataElements[dataElement[id,code,displayName,valueType]]',
+            fields: 'id,displayName,program[id],programStageDataElements[dataElement[id,code,displayName,valueType]],access[data[write]]',
             paging: 'false'
         }
     }
@@ -73,6 +84,10 @@ const useMetadata = (dataToFetch) => {
             query = dataElementQuery
             break;
         }
+        case ME: {
+            query = meQuery
+            break;
+        }
     }
     const {
         loading,
@@ -83,22 +98,30 @@ const useMetadata = (dataToFetch) => {
         console.log(`Fetching ${dataToFetch} error: `, error)
     }
     if (data) {
-        makeIdIndexed(data[dataToFetch][dataToFetch])
-        if (dataToFetch === OPTION_SETS) {
-            data[dataToFetch][dataToFetch].map(optionSet => {
-                makeIdIndexed(optionSet.options)
-            })
-        }
-        if (dataToFetch === PROGRAMS) {
-            data[dataToFetch][dataToFetch].map(program => {
-                makeIdIndexed(program.programStages)
-                program.programStages.map(stage=>{
-                    stage.programStageDataElements.forEach(dataStageElement=>{
-                        stage.programStageDataElements[dataStageElement.dataElement.id]=dataStageElement.dataElement
-                    })
+        if (dataToFetch !== ME) { //if fething is me don't do anything
+            makeIdIndexed(data[dataToFetch][dataToFetch])
+            if (dataToFetch === OPTION_SETS) {
+                data[dataToFetch][dataToFetch].map(optionSet => {
+                    makeIdIndexed(optionSet.options)
                 })
+            }
+            if (dataToFetch === PROGRAMS) {
+                data[dataToFetch][dataToFetch].map(program => {
+                    makeIdIndexed(program.programStages)
+                    program.programStages.map(stage => {
+                        stage.programStageDataElements.forEach(dataStageElement => {
+                            stage.programStageDataElements[dataStageElement.dataElement.id] = dataStageElement.dataElement
+                        })
+                    })
 
-            })
+                })
+            }
+        }else{
+            return {
+                loading,
+                error,
+                data: data && data[dataToFetch]
+            }
         }
     }
     return {
@@ -107,7 +130,6 @@ const useMetadata = (dataToFetch) => {
         data: data && data[dataToFetch][dataToFetch]
     }
 }
-
 
 const makeIdIndexed = objs => {
     objs.forEach(obj => {
@@ -121,5 +143,6 @@ export {
     PROGRAMS,
     PROGRAM_STAGES,
     OPTION_SETS,
-    DATA_ELEMENTS
+    DATA_ELEMENTS,
+    ME
 }

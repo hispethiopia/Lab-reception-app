@@ -102,13 +102,16 @@ class Page extends React.Component {
                                     Array.isArray(this.props.stages) && this.props.stages.length > 0 ?
                                         this.props.stages.map(stage => {
                                             return (
-                                                stage.program.id === this.props.selectedProgram.id ?
+                                                stage.program.id === this.props.selectedProgram.id && 
+                                                (stage.id === LAB_REQUEST_STAGE_ID || stage.id === LAB_RESULT_STAGE_ID) &&
+                                                stage.access.data.write 
+                                                ?
                                                     <SingleSelectOption
                                                         label={stage.displayName}
                                                         value={stage.id}
                                                         key={stage.id}
                                                     /> : ""
-                                            )
+                                                )
                                         }) : <div></div>
                                 }
                             </SingleSelectField>

@@ -4,7 +4,8 @@ const initialState = {
     programs: null,
     labSites: null,
     stages: null,
-    dataElements: null
+    dataElements: null,
+    me: null
 }
 
 const staticDataReducer = (state = initialState, action) => {
@@ -35,6 +36,12 @@ const staticDataReducer = (state = initialState, action) => {
                 ...state,
                 labResultsOptionSet: action.labResultsOptionSet
             };
+        case actionTypes.ME_VARIABLE:
+            return {
+                ...state,
+                meVariable: action.meVariable
+            };
+
         default:
             return state
     }

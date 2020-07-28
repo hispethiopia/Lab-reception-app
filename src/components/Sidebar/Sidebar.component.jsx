@@ -3,28 +3,25 @@ import { connect } from 'react-redux'
 
 import { OrganisationUnitTree } from '@dhis2/ui-widgets'
 
-import {onSelectOrgUnit} from '../../store/actions'
+import { onSelectOrgUnit } from '../../store/actions'
 
 
-class Sidebar extends React.Component {
-    render() {
-        return (
+const Sidebar = (props) => {
+    console.log("props",props.rootOrgUnits)
+    return (
 
-            <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative' }}>
 
-                <OrganisationUnitTree
-                    name="Root org unit"
-                    onChange={this.props.onOrgUnitSelected}
-                    onSelectClick={this.props.onOrgUnitSelected}
-                    roots={[
-                        'b3aCK1PTn5S'
-                    ]}
-                    selected={this.props.selectedOrg? [this.props.selectedOrg.path]:[]}
-                    singleSelection
-                />
-            </div>
-        )
-    }
+            <OrganisationUnitTree
+                name="Root org unit"
+                onChange={props.onOrgUnitSelected}
+                onSelectClick={props.onOrgUnitSelected}
+                roots={props.rootOrgUnits.map(orgUnit=>{return orgUnit.id})}
+                selected={props.selectedOrg ? [props.selectedOrg.path] : []}
+                singleSelection
+            />
+        </div>
+    )
 }
 
 const mapStateToProps = state => {
